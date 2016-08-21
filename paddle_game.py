@@ -53,6 +53,7 @@ class GameState():
         for key in self.block_field.keys():
             rect = self.block_field[key][0]
             if rect.get_hp() <= 0:
+                self.current_score += rect.get_score_for_destroy()
                 del self.block_field[key]
                 del self.block_dict[key]
             else:
@@ -180,6 +181,12 @@ class GameBlock(pg.Rect):
 
     def get_hp(self):
         return self.to_destroy
+
+    def get_score_for_destroy(self):
+        return self.score_for_destroy
+
+    def get_score_per_strike(self):
+        return self.score_per_strike
 
     def decrement_hp(self):
         self.to_destroy -= 1
@@ -326,12 +333,12 @@ class Ball(Player):
     #I need to add in the slope variability so that the ball
     #will travel at different angles
     def travel(self, collision_with):
+        prev = self.game_state.ball_travels['prev']
         down = collision_with == 'top'
         left = collision_with == 'right'
         right = collision_with == 'left'
         up = collision_with == 'paddle'
         killed = collision_with == 'dead'
-        prev = self.game_state.ball_travels['prev']
         leftward = (prev == 'up_neg_m'
                     or prev == 'down_pos_m')
         rightward = (prev == 'up_pos_m'
@@ -408,6 +415,7 @@ class Ball(Player):
         for key, rect in block_dict.iteritems():
             if ball.colliderect(rect):
                 self.game_state.block_field[key][0].decrement_hp()
+                self.game_state.current_score += self.game_state.block_field[key][0].get_score_per_strike()
             else:
                 continue
 
