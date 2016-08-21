@@ -115,7 +115,19 @@ class GameBlock(pg.Rect):
         self.color_sequence = []
         for num in range(0, to_destroy):
             self.color_sequence.append((0 + num*(255/to_destroy), 255, 255))
-        print self.color_sequence
+        self.score_per_strike = 10
+        self.score_for_destroy = to_destroy * 100
+        self.possible_bonus = {
+        'missile': 'single misile, causes 1 strike to 1 block',
+        '2x score': 'duh',
+        '3x score': 'duh',
+        'slow ball': 'slows ball speed by 2',
+        'splash bomb': 'explosive causes 3 damage to one square and 1 to surrounding',
+        'extra ball': 'need to add an is_extra attr to ball class',
+        'triple ball': 'splits ball mid air, need to tweek ball class further'
+        'drill': 'causes strike damage to anything thing in its path for a total of 15 eg 1 easy block followed by 4 mediums, it destroys them successively',
+        'sticky bomb': 'allows angular launch, bounces from wall, but sticks to blocks acts like splash bomb'
+        }
 
     def has_bonus(self):
         """
@@ -144,12 +156,6 @@ class InsaneBlock(GameBlock):
 class DemonBlock(GameBlock):
     def __init__(self, *args, **kwargs):
         GameBlock.__init__(self, 20)
-
-EasyBlock()
-MediumBlock()
-HardBlock()
-InsaneBlock()
-DemonBlock()
 
 class Player(pg.Rect):
     """
