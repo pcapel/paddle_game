@@ -17,6 +17,8 @@ class GameState():
     """
     def __init__(self, *args, **kwargs):
         #init will have all the inital positions and vectors for things
+        self.player_lives = 3
+        self.current_score = 0
         self.level_designs = {
         1: {
             'dimensions': (15, 15) #(x,y) block dimensions
@@ -128,13 +130,13 @@ class Player():
     def get_x(self):
         return self.x_pos
 
-    def _draw(self, paddle_width=75, paddle_height=20, color=(0,255,0)):
+    def _draw(self, width=75, height=20, color=(0,255,0)):
         return pg.draw.rect(screen,
                 color,
                 pg.Rect(self.x_pos,
                     self.y_pos,
-                    paddle_width,
-                    paddle_height))
+                    width,
+                    height))
 
 class Ball(Player):
     """
@@ -144,7 +146,7 @@ class Ball(Player):
     """
     def __init__(self, *args, **kwargs):
         #define initial vectors and position then pass to GameState
-        pass
+
 
 
 
@@ -177,24 +179,7 @@ strike_counter = 0
 life_count = 3
 
 _player = Player()
-
-def draw_player(paddle_width=75,
-paddle_height=20):
-
-    return pg.draw.rect(screen,
-            player_color,
-            pg.Rect(player_x,
-                player_y,
-                paddle_width,
-                paddle_height))
-
-def draw_ball(size=15):
-    return pg.draw.rect(screen,
-            comp_color,
-            pg.Rect(comp_x,
-                comp_y,
-                size,
-                size))
+_ball = Ball()
 
 
 #game loop
@@ -216,6 +201,8 @@ while not done:
 
         screen.fill((0, 0, 0))
         _player._draw()
+        _ball.draw()
+
         #p = draw_player()
         #c = draw_ball()
 
