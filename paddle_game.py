@@ -213,6 +213,13 @@ class Ball(Player):
         self.speed = 5
         self.is_launched = False
 
+    def travel(self):
+        self.x_pos += self.speed
+        self.y_pos += self.speed
+        return None
+
+    def check_lauch(self):
+        return self.is_launched
 
     def launch(self):
         self.is_launched = True
@@ -297,6 +304,8 @@ while not done:
         _state.right_edge()
         _state.left_edge()
         _state.top_edge()
+        if _ball.check_lauch():
+            _ball.travel()
 
 
         #p = draw_player()
