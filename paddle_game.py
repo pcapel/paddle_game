@@ -1,7 +1,6 @@
 import pygame as pg
 import sqlite3 as sq
 #use sqlite db for save game data
-#create classes and move this shit to OOP with a game loop
 
 pg.init()
 
@@ -10,15 +9,7 @@ scrn_h = screen.get_height()
 scrn_w = screen.get_width()
 
 class GameState():
-    """
-    the game state class is a modelling class that tracks all the changes to the
-    state of the game and will be initialized according to level vars to allow
-    for many levels.
-    perhaps it will track whether you're in menu, paused, or dead as well
-    yeah, that seems smart
-    """
     def __init__(self, *args, **kwargs):
-        #init will have all the inital positions and vectors for things
         self.player_lives = 3
         self.current_score = 0
         self.level_designs = {
@@ -53,12 +44,10 @@ class GameState():
         return self.player_lives
 
     def update(self, var_name=None, with_val=None):
-        """
-        udates the passed var_name witht the value.
-        should perform a type check on the value to ensure that correct
-        update is performed, also, let's not break the game if it passes in
-        nothing, eh?
-        """
+        #this really just overrides shit and could be used to
+        #create any variable I wanted soooo
+        #it's probably not good
+        #but it works...
         self.var_name = with_val
         return None
 
@@ -80,12 +69,11 @@ class GameState():
 
     def ball_dir(self, ball=1):
         """
-        returns the line that the ball is traveling on in the form of
-        y = mx + b allowing projection of the x/y intercepts
-        used for determining the slop modulation upon collision
-        also useful for a faux AI like paddle.
+        returns ball direction in the form of the string of the method name
+        that was called to move it eg up_neg_m (upward motion, negative slope)
+        the names descripe the characteristics of the line the ball travels
         """
-        return self.ball_travels
+        return self.ball_travels['prev']
 
     def right_edge(self):
         return pg.draw.rect(screen,
@@ -134,7 +122,6 @@ class Player(pg.Rect):
     and the like
     """
     def __init__(self, state, *args, **kwargs):
-        #define initial state and pass to GameState
         self.game_state = state
         self.width = 75
         self.height = 20
@@ -223,6 +210,8 @@ class Ball(Player):
         self.speed = 5
         self.is_launched = False
 
+    #I need to add in the slope variability so that the ball
+    #will travel at different angles
     def travel(self, collision_with):
         down = collision_with == 'top'
         left = collision_with == 'right'
