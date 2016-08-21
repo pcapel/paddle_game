@@ -334,10 +334,18 @@ class Ball(Player):
     #will travel at different angles
     def travel(self, collision_with):
         prev = self.game_state.ball_travels['prev']
-        down = collision_with == 'top'
-        left = collision_with == 'right'
-        right = collision_with == 'left'
-        up = collision_with == 'paddle'
+        down = (collision_with == 'top'
+                or (collision_with == 'block' and prev == 'up_neg_m')
+                or (collision_with == 'block' and prev == 'up_pos_m'))
+        left = (collision_with == 'right'
+                or (collision_with == 'block' and prev == 'up_pos_m')
+                or (collision_with == 'block' and prev == 'down_neg_m'))
+        right = (collision_with == 'left'
+                or (collision_with == 'block' and prev == 'up_neg_m')
+                or (collision_with == 'block' and prev == 'down_pos_m'))
+        up = (collision_with == 'paddle'
+             or (collision_with == 'block' and prev == 'down_pos_m')
+             or (collision_with == 'block' and prev == 'down_neg_m'))
         killed = collision_with == 'dead'
         leftward = (prev == 'up_neg_m'
                     or prev == 'down_pos_m')
@@ -413,7 +421,7 @@ class Ball(Player):
         elif ball.colliderect(paddle):
             return 'paddle'
         elif block:
-
+            return 'block'
         else:
             return None
 
