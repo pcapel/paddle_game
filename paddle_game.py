@@ -5,7 +5,7 @@ import sqlite3 as sq
 
 pg.init()
 
-screen = pg.display.set_mode((600, 500))
+screen = pg.display.set_mode((800, 700))
 scrn_h = screen.get_height()
 scrn_w = screen.get_width()
 
@@ -88,24 +88,24 @@ class GameState():
     def right_edge(self):
         return pg.draw.rect(screen,
                 (0,0,255),
-                pg.Rect(10,
-                    scrn_h,
+                pg.Rect(scrn_w,
+                    0,
                     5,
                     scrn_h))
 
     def left_edge(self):
         return pg.draw.rect(screen,
                 (0,0,255),
-                pg.Rect(5,
-                    scrn_h,
-                    scrn_w,
-                    5))
+                pg.Rect(-5,
+                    0,
+                    5,
+                    scrn_h))
 
     def top_edge(self):
         return pg.draw.rect(screen,
                 (0,0,255),
                 pg.Rect(0,
-                    scrn_h,
+                    -5,
                     scrn_w,
                     5))
 
@@ -294,6 +294,10 @@ while not done:
         _player._draw()
         _ball._draw(_player)
         _state.deathzone()
+        _state.right_edge()
+        _state.left_edge()
+        _state.top_edge()
+
 
         #p = draw_player()
         #c = draw_ball()
