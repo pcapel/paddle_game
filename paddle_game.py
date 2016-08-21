@@ -22,14 +22,13 @@ class GameState():
             }
         }
 
-        self.block_field = []
+        self.block_field = {}
 
+        self.block_dict = {}
 
         for row in xrange(1, self.level_designs[level]['dimensions'][1]+1):
-            row = []
             for col in xrange(1, self.level_designs[level]['dimensions'][0]+1):
-                row.append(EasyBlock())
-            self.block_field.append(row)
+                self.block_field['row%dcol%d'%(row,col)] = (MediumBlock(), (row, col))
         self.draw_field()
 
 
@@ -37,21 +36,40 @@ class GameState():
         self.ball_travels = {'prev': 'up_pos_m'}
 
     def draw_field(self):
+        self.clear_dead()
         top_corner = self.level_designs[self.level]['upper left']
         row_offset = 20
         col_offset = 50
-        for row, rects in enumerate(self.block_field):
-            for col, rect in enumerate(rects):
-                rect.set_x_pos((col_offset * col) + top_corner[0])
-                rect.set_y_pos((row_offset * row) + top_corner[1])
-                rect._draw()
+        for key, tup in self.block_field.iteritems():
+            rect = tup[0]
+            row = tup[1][0]
+            col = tup[1][1]
+            rect.set_x_pos((col_offset * col) + top_corner[0])
+            rect.set_y_pos((row_offset * row) + top_corner[1])
+            self.block_dict[key] = rect._draw()
+        return None
 
+    def clear_dead(self):
+        for key in self.block_field.keys():
+            rect = self.block_field[key][0]
+            if rect.get_hp() <= 0:
+                del self.block_field[key]
+                del self.block_dict[key]
+            else:
+                continue
+        return None
 
     def get_score(self):
         return self.current_score
 
     def get_lives(self):
         return self.player_lives
+
+    def get_field(self):
+        return self.block_field
+
+    def get_blocks(self):
+        return self.block_dict
 
     def update(self, var_name=None, with_val=None):
         #this really just overrides shit and could be used to
@@ -160,6 +178,13 @@ class GameBlock(pg.Rect):
         """
         pass
 
+    def get_hp(self):
+        return self.to_destroy
+
+    def decrement_hp(self):
+        self.to_destroy -= 1
+        return None
+
     def set_x_pos(self, pos):
         self.x_pos = pos
         return None
@@ -170,13 +195,14 @@ class GameBlock(pg.Rect):
 
     def _draw(self):
         color_index = self.to_destroy - 1
-        color = self.color_sequence[color_index]
+        if color_index >= 0:
+            color = self.color_sequence[color_index]
         return pg.draw.rect(screen,
                 color,
                 pg.Rect(self.x_pos,
                     self.y_pos,
                     self.width,
-                    self.height) 4)
+                    self.height), 2)
 
 
 class EasyBlock(GameBlock):
@@ -378,6 +404,13 @@ class Ball(Player):
         else:
             return None
 
+    def hit_block(self, ball, block_dict):
+        for key, rect in block_dict.iteritems():
+            if ball.colliderect(rect):
+                self.game_state.block_field[key][0].decrement_hp()
+            else:
+                continue
+
     def check_lauch(self):
         return self.is_launched
 
@@ -450,6 +483,7 @@ while not done:
             _ball.launch()
 
         screen.fill((0, 0, 0))
+        _state.draw_field()
         paddle = _player._draw()
         ball = _ball._draw(_player)
         death = _state.deathzone()
@@ -458,7 +492,10 @@ while not done:
         top = _state.top_edge()
         if _ball.check_lauch():
             _ball.travel(_ball.check_collision(ball, left, top, right, death, paddle))
-        _state.draw_field()
+        _ball.hit_block(ball, _state.get_blocks())
+
+
+
 
         score_text = font.render("Current Score: %d"%_state.get_score(),
                     True,
