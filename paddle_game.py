@@ -397,7 +397,11 @@ class Ball(Player):
         self.game_state.ball_travels['prev'] = 'down_neg_m'
         return None
 
-    def check_collision(self, ball, left, top, right, bottom, paddle):
+    def check_collision(self, ball, left, top, right, bottom, paddle, block):
+        """
+        everything except block is a rect instance
+        block is the output from hit_block which is a bool
+        """
         if ball.colliderect(left):
             return 'left'
         elif ball.colliderect(top):
@@ -408,6 +412,8 @@ class Ball(Player):
             return 'dead'
         elif ball.colliderect(paddle):
             return 'paddle'
+        elif block:
+
         else:
             return None
 
@@ -416,8 +422,11 @@ class Ball(Player):
             if ball.colliderect(rect):
                 self.game_state.block_field[key][0].decrement_hp()
                 self.game_state.current_score += self.game_state.block_field[key][0].get_score_per_strike()
+                return True
             else:
                 continue
+        else:
+            return False
 
     def check_lauch(self):
         return self.is_launched
@@ -499,8 +508,11 @@ while not done:
         left = _state.left_edge()
         top = _state.top_edge()
         if _ball.check_lauch():
-            _ball.travel(_ball.check_collision(ball, left, top, right, death, paddle))
-        _ball.hit_block(ball, _state.get_blocks())
+            _ball.travel(_ball.check_collision(ball,
+            left, top, right, death,
+            paddle,
+            _ball.hit_block(ball, _state.get_blocks())))
+
 
 
 
