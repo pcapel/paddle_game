@@ -85,6 +85,14 @@ class GameState():
         """
         pass
 
+    def _draw_deathzone(self):
+        return pg.draw.rect(screen,
+                (0,255,0),
+                pg.Rect(scrn_h,
+                    scrn_w,
+                    scrn_w,
+                    5))
+
     def timer(start=1, end=5):
         """
         timer for various actions, power ups, etc
@@ -235,6 +243,7 @@ life_count = 3
 
 _player = Player()
 _ball = Ball()
+_state = GameState()
 
 
 #game loop
@@ -260,6 +269,7 @@ while not done:
         screen.fill((0, 0, 0))
         _player._draw()
         _ball._draw(_player)
+        _state._draw_deathzone()
 
         #p = draw_player()
         #c = draw_ball()
