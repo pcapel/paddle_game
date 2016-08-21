@@ -6,6 +6,8 @@ import sqlite3 as sq
 pg.init()
 
 screen = pg.display.set_mode((600, 500))
+scrn_h = screen.get_height()
+scrn_w = screen.get_width()
 
 class GameState():
     """
@@ -25,7 +27,7 @@ class GameState():
             }
         }
 
-        self.player_paddle_state = ['x', 'y']
+        self.player_paddle_state = ['prev_x', 'current_x']
 
     def build_field(level=1):
         """
@@ -43,21 +45,36 @@ class GameState():
         """
         pass
 
-    def update(var_name=None, with_val=None):
+    def update(self, instance=None, var_name=None, with_val=None):
         """
         udates the passed var_name witht the value.
         should perform a type check on the value to ensure that correct
         update is performed, also, let's not break the game if it passes in
         nothing, eh?
         """
-        pass
+        if not var_name:
+            return None
+        if not instance:
+            self.var_name = with_val
+        else:
+            self.var_name = instance.with_val
+        return None
 
     def player_dir(paddle=1):
         """
         return the direction that the player is moving in
         uses player_paddle_state passed from player class
         """
-        pass
+        prev = self.player_paddle_state[0]
+        cur = self.player_paddle_state[1]
+        dir_right = cur - prev > 0
+        dir_left = cur - prev < 0
+        if dir_left:
+            return 'left'
+        elif dir_right:
+            return 'right'
+        else:
+            return 'stationary'
 
     def ball_dir(ball=1):
         """
@@ -84,8 +101,11 @@ class Player():
     """
     def __init__(self, *args, **kwargs):
         #define initial state and pass to GameState
+        self.width = 75
+        self.height = 20
         self.x_pos = 175
-        self.y_pos = screen.get_height() - player_paddle_height
+        self.y_pos = scrn_h - player_paddle_height
+        self.center = ((self.x_pos + self.width / 2), self.y_pos)
         self.dir = None
         self.speed = 5
 
@@ -99,10 +119,12 @@ class Player():
 
     def move_right(self):
         self.x_pos += self.speed
+        self.center = ((self.x_pos + self.width / 2), self.y_pos)
         return None
 
     def move_left(self):
         self.x_pos -= self.speed
+        self.center = ((self.x_pos + self.width / 2), self.y_pos)
         return None
 
     def change_speed(self, value=5):
@@ -130,7 +152,15 @@ class Player():
     def get_x(self):
         return self.x_pos
 
-    def _draw(self, width=75, height=20, color=(0,255,0)):
+    def return_center(self):
+        return self.center
+
+    def _draw(self, width=None, height=None, color=(0,255,0)):
+        if not width:
+            width = self.width
+        if not height:
+            height = self.height
+
         return pg.draw.rect(screen,
                 color,
                 pg.Rect(self.x_pos,
@@ -146,6 +176,31 @@ class Ball(Player):
     """
     def __init__(self, *args, **kwargs):
         #define initial vectors and position then pass to GameState
+        self.x_pos = -5
+        self.y_pos = -5
+        self.speed = 5
+        self.is_launched = False
+
+
+    def launch(self):
+        self.is_launched = True
+        return None
+
+    def _draw(self, player_instance, radius=8, color=(255,255,255)):
+        if not self.is_launched:
+            return pg.draw.circle(screen,
+                color,
+                player_instance.return_center(),
+                radius)
+        else:
+            if self.x_pos < -3 and self.y_pos < -3:
+                start_from = player_instance.return_center()
+                self.x_pos = start_from[0]
+                self.y_pos = start_from[1]
+            return pg.draw.circle(screen,
+                color,
+                (self.x_pos, self.y_pos),
+                radius)
 
 
 
@@ -199,9 +254,12 @@ while not done:
                     - player_paddle_width):
             _player.move_right()
 
+        if (pressed[pg.K_SPACE]):
+            _ball.launch()
+
         screen.fill((0, 0, 0))
         _player._draw()
-        _ball.draw()
+        _ball._draw(_player)
 
         #p = draw_player()
         #c = draw_ball()
