@@ -176,7 +176,7 @@ class GameBlock(pg.Rect):
                 pg.Rect(self.x_pos,
                     self.y_pos,
                     self.width,
-                    self.height))
+                    self.height) 4)
 
 
 class EasyBlock(GameBlock):
