@@ -130,12 +130,13 @@ class Player(pg.Rect):
         self.center = ((self.x_pos + self.width / 2), self.y_pos)
         self.dir = None
         self.speed = 5
+        self.color = (255, 0, 150)
 
-    def add_aura(size=(20,20), color=(150,150,150), is_flash=False):
+    def add_aura(type='normal'):
         """
-        adds aura to player paddle, size is a tuple representing the (x,y) value
-        of the rectangle that is used to draw the ellipse, probably use Rect.clamp()
-        to keep it tied to player paddle
+        I think that this can work as a decorator for the _draw function
+        I'll have to figure out how I want to define the different types
+        though.
         """
         pass
 
@@ -177,7 +178,9 @@ class Player(pg.Rect):
     def return_center(self):
         return self.center
 
-    def _draw(self, width=None, height=None, color=(0,255,0)):
+    def _draw(self, width=None, height=None, color=None):
+        if color = None:
+            color = self.color
         if not width:
             width = self.width
         if not height:
