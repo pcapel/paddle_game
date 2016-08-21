@@ -11,15 +11,21 @@ scrn_h = screen.get_height()
 scrn_w = screen.get_width()
 
 class GameState():
-    def __init__(self, level=1, *args, **kwargs):
+    def __init__(self, level=2, *args, **kwargs):
         self.player_lives = 3
         self.current_score = 0
         self.level = level
         self.level_designs = {
         1: {
             'dimensions': (10, 4), #(x,y) block dimensions
-            'upper left': (150, 150)
-            }
+            'upper left': (150, 150),
+            'block type': EasyBlock,
+            },
+        2: {
+            'dimensions': (10, 5),
+            'upper left': (200, 100),
+            'block type': MediumBlock,
+        }
         }
 
         self.block_field = {}
@@ -28,7 +34,7 @@ class GameState():
 
         for row in xrange(1, self.level_designs[level]['dimensions'][1]+1):
             for col in xrange(1, self.level_designs[level]['dimensions'][0]+1):
-                self.block_field['row%dcol%d'%(row,col)] = (MediumBlock(), (row, col))
+                self.block_field['row%dcol%d'%(row,col)] = (self.level_designs[level]['block type'](), (row, col))
         self.draw_field()
 
 
@@ -152,8 +158,6 @@ class GameBlock(pg.Rect):
         self.y_pos = 150
         self.to_destroy = to_destroy
         self.color_sequence = []
-        for num in range(0, to_destroy):
-            self.color_sequence.append((0 + num*(255/to_destroy), 255, 255))
         self.score_per_strike = 10
         self.score_for_destroy = to_destroy * 100
         self.possible_bonus = {
@@ -164,7 +168,8 @@ class GameBlock(pg.Rect):
         'splash bomb': 'explosive causes 3 damage to one square and 1 to surrounding',
         'extra ball': 'need to add an is_extra attr to ball class',
         'triple ball': 'splits ball mid air, need to tweek ball class further',
-        'drill': 'causes strike damage to anything thing in its path for a total of 15 eg 1 easy block followed by 4 mediums, it destroys them successively',
+        'drill': ('causes strike damage to anything thing in its path for a total of 15 eg 1',
+                'easy block followed by 4 mediums, it destroys them successively'),
         'sticky bomb': 'allows angular launch, bounces from wall, but sticks to blocks acts like splash bomb',
         'explosive ball': 'may take some tweeking',
         'paddle expand': 'should it be stackable?',
@@ -178,6 +183,12 @@ class GameBlock(pg.Rect):
         returns a bonus type as string, eg 'rockets', or False
         """
         pass
+
+    def set_colors(self, red_mod=255, grn_mod=255, blu_mod=255):
+        for num in range(1, self.to_destroy + 1):
+            self.color_sequence.append( (15 + (num * (red_mod / self.to_destroy)),
+            15 + (num * (grn_mod / self.to_destroy)),
+            15 + (num * (blu_mod / self.to_destroy))))
 
     def get_hp(self):
         return self.to_destroy
@@ -215,22 +226,27 @@ class GameBlock(pg.Rect):
 class EasyBlock(GameBlock):
     def __init__(self, *args, **kwargs):
         GameBlock.__init__(self, 1)
+        self.set_colors(0, 0, 240)
 
 class MediumBlock(GameBlock):
     def __init__(self, *args, **kwargs):
         GameBlock.__init__(self, 3)
+        self.set_colors(150, 0, 240)
 
 class HardBlock(GameBlock):
     def __init__(self, *args, **kwargs):
         GameBlock.__init__(self, 5)
+        self.set_colors(200, 0, 150)
 
 class InsaneBlock(GameBlock):
     def __init__(self, *args, **kwargs):
         GameBlock.__init__(self, 10)
+        self.set_colors(200, 0, 100)
 
 class DemonBlock(GameBlock):
     def __init__(self, *args, **kwargs):
         GameBlock.__init__(self, 20)
+        self.set_colors(240, 50, 50)
 
 class Player(pg.Rect):
     """
@@ -246,7 +262,7 @@ class Player(pg.Rect):
         self.y_pos = scrn_h - player_paddle_height
         self.center = ((self.x_pos + self.width / 2), self.y_pos)
         self.dir = None
-        self.speed = 5
+        self.speed = 9
         self.color = (150, 0, 150)
 
     def add_aura(type='normal'):
@@ -334,15 +350,13 @@ class Ball(Player):
     #will travel at different angles
     def travel(self, collision_with):
         prev = self.game_state.ball_travels['prev']
+        left = (collision_with == 'right'
+                or collision_with == 'block')
+        right = (collision_with == 'left'
+                or collision_with == 'block')
         down = (collision_with == 'top'
                 or (collision_with == 'block' and prev == 'up_neg_m')
                 or (collision_with == 'block' and prev == 'up_pos_m'))
-        left = (collision_with == 'right'
-                or (collision_with == 'block' and prev == 'up_pos_m')
-                or (collision_with == 'block' and prev == 'down_neg_m'))
-        right = (collision_with == 'left'
-                or (collision_with == 'block' and prev == 'up_neg_m')
-                or (collision_with == 'block' and prev == 'down_pos_m'))
         up = (collision_with == 'paddle'
              or (collision_with == 'block' and prev == 'down_pos_m')
              or (collision_with == 'block' and prev == 'down_neg_m'))
@@ -481,7 +495,7 @@ y_dir = True
 
 font = pg.font.Font(None, 25)
 
-_state = GameState(1)
+_state = GameState()
 _player = Player(_state)
 _ball = Ball(_state)
 
