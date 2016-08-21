@@ -28,6 +28,7 @@ class GameState():
         }
 
         self.player_paddle_state = ['prev_x', 'current_x']
+        self.ball_travels = {'prev': 'up_pos_m'}
 
     def build_field(level=1):
         """
@@ -45,19 +46,20 @@ class GameState():
         """
         pass
 
-    def update(self, instance=None, var_name=None, with_val=None):
+    def get_score(self):
+        return self.current_score
+
+    def get_lives(self):
+        return self.player_lives
+
+    def update(self, var_name=None, with_val=None):
         """
         udates the passed var_name witht the value.
         should perform a type check on the value to ensure that correct
         update is performed, also, let's not break the game if it passes in
         nothing, eh?
         """
-        if not var_name:
-            return None
-        if not instance:
-            self.var_name = with_val
-        else:
-            self.var_name = instance.with_val
+        self.var_name = with_val
         return None
 
     def player_dir(paddle=1):
@@ -76,27 +78,27 @@ class GameState():
         else:
             return 'stationary'
 
-    def ball_dir(ball=1):
+    def ball_dir(self, ball=1):
         """
         returns the line that the ball is traveling on in the form of
         y = mx + b allowing projection of the x/y intercepts
         used for determining the slop modulation upon collision
         also useful for a faux AI like paddle.
         """
-        pass
+        return self.ball_travels
 
     def right_edge(self):
         return pg.draw.rect(screen,
                 (0,0,255),
-                pg.Rect(scrn_w,
+                pg.Rect(scrn_w - 1,
                     0,
-                    5,
+                    1,
                     scrn_h))
 
     def left_edge(self):
         return pg.draw.rect(screen,
                 (0,0,255),
-                pg.Rect(-5,
+                pg.Rect(-4,
                     0,
                     5,
                     scrn_h))
@@ -105,7 +107,7 @@ class GameState():
         return pg.draw.rect(screen,
                 (0,0,255),
                 pg.Rect(0,
-                    -5,
+                    -4,
                     scrn_w,
                     5))
 
@@ -113,7 +115,7 @@ class GameState():
         return pg.draw.rect(screen,
                 (0,0,255),
                 pg.Rect(0,
-                    scrn_h,
+                    scrn_h - 1,
                     scrn_w,
                     5))
 
@@ -125,14 +127,15 @@ class GameState():
         pass
 
 
-class Player():
+class Player(pg.Rect):
     """
     the player class will represent the paddle that the player controls
     it will have methods associated with controlling power ups, actions,
     and the like
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, state, *args, **kwargs):
         #define initial state and pass to GameState
+        self.game_state = state
         self.width = 75
         self.height = 20
         self.x_pos = 175
@@ -206,36 +209,115 @@ class Ball(Player):
     collision, such as tracking position and what type of surface it has collided
     with, as well as any relevant power up info
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, state, *args, **kwargs):
         #define initial vectors and position then pass to GameState
+        self.call_dict = {
+        'up_pos_m': self.up_pos_m,
+        'up_neg_m': self.up_neg_m,
+        'down_pos_m': self.down_pos_m,
+        'down_neg_m': self.down_neg_m
+        }
+        self.game_state = state
         self.x_pos = -5
         self.y_pos = -5
         self.speed = 5
         self.is_launched = False
 
-    def travel(self):
+    def travel(self, collision_with):
+        down = collision_with == 'top'
+        left = collision_with == 'right'
+        right = collision_with == 'left'
+        up = collision_with == 'paddle'
+        killed = collision_with == 'dead'
+        prev = self.game_state.ball_travels['prev']
+        leftward = (prev == 'up_neg_m'
+                    or prev == 'down_pos_m')
+        rightward = (prev == 'up_pos_m'
+                    or prev == 'down_neg_m')
+        upward = (prev == 'up_pos_m'
+                    or prev == 'up_neg_m')
+        downward = (prev == 'down_neg_m'
+                    or prev == 'down_pos_m')
+
+        if up and rightward:
+            self.up_pos_m()
+        elif up and leftward:
+            self.up_neg_m()
+        elif down and rightward:
+            self.down_neg_m()
+        elif down and leftward:
+            self.down_pos_m()
+        elif right and upward:
+            self.up_pos_m()
+        elif right and downward:
+            self.down_neg_m()
+        elif left and upward:
+            self.up_neg_m()
+        elif left and downward:
+            self.down_pos_m()
+        elif killed:
+            self.is_launched = False
+            self.game_state.player_lives -= 1
+        else:
+            self.call_dict[prev]()
+        return None
+
+    def up_pos_m(self):
+        self.x_pos += self.speed
+        self.y_pos -= self.speed
+        self.game_state.ball_travels['prev'] = 'up_pos_m'
+        return None
+
+    def down_pos_m(self):
+        self.x_pos -= self.speed
+        self.y_pos += self.speed
+        self.game_state.ball_travels['prev'] = 'down_pos_m'
+        return None
+
+    def up_neg_m(self):
+        self.x_pos -= self.speed
+        self.y_pos -= self.speed
+        self.game_state.ball_travels['prev'] = 'up_neg_m'
+        return None
+
+    def down_neg_m(self):
         self.x_pos += self.speed
         self.y_pos += self.speed
+        self.game_state.ball_travels['prev'] = 'down_neg_m'
         return None
+
+    def check_collision(self, ball, left, top, right, bottom, paddle):
+        if ball.colliderect(left):
+            return 'left'
+        elif ball.colliderect(top):
+            return 'top'
+        elif ball.colliderect(right):
+            return 'right'
+        elif ball.colliderect(bottom):
+            return 'dead'
+        elif ball.colliderect(paddle):
+            return 'paddle'
+        else:
+            return None
 
     def check_lauch(self):
         return self.is_launched
 
     def launch(self):
         self.is_launched = True
+        self.game_state.update('ball_travels', 'up_pos_m')
         return None
 
     def _draw(self, player_instance, radius=8, color=(255,255,255)):
         if not self.is_launched:
+            start_from = player_instance.return_center()
+            self.x_pos = start_from[0]
+            self.y_pos = start_from[1]
             return pg.draw.circle(screen,
                 color,
                 player_instance.return_center(),
                 radius)
         else:
-            if self.x_pos < -3 and self.y_pos < -3:
-                start_from = player_instance.return_center()
-                self.x_pos = start_from[0]
-                self.y_pos = start_from[1]
             return pg.draw.circle(screen,
                 color,
                 (self.x_pos, self.y_pos),
@@ -268,13 +350,10 @@ y_dir = True
 
 font = pg.font.Font(None, 25)
 
-strike_counter = 0
-
-life_count = 3
-
-_player = Player()
-_ball = Ball()
 _state = GameState()
+_player = Player(_state)
+_ball = Ball(_state)
+
 
 
 #game loop
@@ -298,15 +377,14 @@ while not done:
             _ball.launch()
 
         screen.fill((0, 0, 0))
-        _player._draw()
-        _ball._draw(_player)
-        _state.deathzone()
-        _state.right_edge()
-        _state.left_edge()
-        _state.top_edge()
+        paddle = _player._draw()
+        ball = _ball._draw(_player)
+        death = _state.deathzone()
+        right = _state.right_edge()
+        left = _state.left_edge()
+        top = _state.top_edge()
         if _ball.check_lauch():
-            _ball.travel()
-
+            _ball.travel(_ball.check_collision(ball, left, top, right, death, paddle))
 
         #p = draw_player()
         #c = draw_ball()
@@ -335,11 +413,11 @@ while not done:
         # and comp_below_contact):
         #     x_dir = not x_dir
 
-        score_text = font.render("Current Score: %d"%strike_counter,
+        score_text = font.render("Current Score: %d"%_state.get_score(),
                     True,
                     (0, 255,255))
 
-        lives_text = font.render("Lives Remaining: %d"%life_count,
+        lives_text = font.render("Lives Remaining: %d"%_state.get_lives(),
                     True,
                     (0,255,255))
 
