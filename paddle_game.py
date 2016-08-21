@@ -1,4 +1,6 @@
 import pygame as pg
+import math
+import random
 import sqlite3 as sq
 #use sqlite db for save game data
 
@@ -26,14 +28,6 @@ class GameState():
         this'll be a doozy, based on level, read out from field design dict
         and initialize all the blocks in the field with randomized chances for
         drops.
-        """
-        pass
-
-    def has_bonus():
-        """
-        uses a random number to return a bonus type.
-        used to determine if a block in build_field will have a bonus.
-        returns a bonus type as string, eg 'rockets', or False
         """
         pass
 
@@ -77,7 +71,7 @@ class GameState():
 
     def right_edge(self):
         return pg.draw.rect(screen,
-                (0,0,255),
+                (0,0,0),
                 pg.Rect(scrn_w - 1,
                     0,
                     1,
@@ -85,7 +79,7 @@ class GameState():
 
     def left_edge(self):
         return pg.draw.rect(screen,
-                (0,0,255),
+                (0,0,0),
                 pg.Rect(-4,
                     0,
                     5,
@@ -93,7 +87,7 @@ class GameState():
 
     def top_edge(self):
         return pg.draw.rect(screen,
-                (0,0,255),
+                (0,0,0),
                 pg.Rect(0,
                     -4,
                     scrn_w,
@@ -101,7 +95,7 @@ class GameState():
 
     def deathzone(self):
         return pg.draw.rect(screen,
-                (0,0,255),
+                (0,0,0),
                 pg.Rect(0,
                     scrn_h - 1,
                     scrn_w,
@@ -114,6 +108,48 @@ class GameState():
         """
         pass
 
+class GameBlock(pg.Rect):
+    def __init__(self, to_destroy, **kwargs):
+        self.has_bonus()
+        self.to_destroy = to_destroy
+        self.color_sequence = []
+        for num in range(0, to_destroy):
+            self.color_sequence.append((0 + num*(255/to_destroy), 255, 255))
+        print self.color_sequence
+
+    def has_bonus(self):
+        """
+        uses a random number to return a bonus type.
+        used to determine if a block in build_field will have a bonus.
+        returns a bonus type as string, eg 'rockets', or False
+        """
+        pass
+
+class EasyBlock(GameBlock):
+    def __init__(self, *args, **kwargs):
+        GameBlock.__init__(self, 1)
+
+class MediumBlock(GameBlock):
+    def __init__(self, *args, **kwargs):
+        GameBlock.__init__(self, 3)
+
+class HardBlock(GameBlock):
+    def __init__(self, *args, **kwargs):
+        GameBlock.__init__(self, 5)
+
+class InsaneBlock(GameBlock):
+    def __init__(self, *args, **kwargs):
+        GameBlock.__init__(self, 10)
+
+class DemonBlock(GameBlock):
+    def __init__(self, *args, **kwargs):
+        GameBlock.__init__(self, 20)
+
+EasyBlock()
+MediumBlock()
+HardBlock()
+InsaneBlock()
+DemonBlock()
 
 class Player(pg.Rect):
     """
@@ -130,7 +166,7 @@ class Player(pg.Rect):
         self.center = ((self.x_pos + self.width / 2), self.y_pos)
         self.dir = None
         self.speed = 5
-        self.color = (255, 0, 150)
+        self.color = (150, 0, 150)
 
     def add_aura(type='normal'):
         """
@@ -179,7 +215,7 @@ class Player(pg.Rect):
         return self.center
 
     def _draw(self, width=None, height=None, color=None):
-        if color = None:
+        if not color:
             color = self.color
         if not width:
             width = self.width
