@@ -85,6 +85,30 @@ class GameState():
         """
         pass
 
+    def right_edge(self):
+        return pg.draw.rect(screen,
+                (0,0,255),
+                pg.Rect(10,
+                    scrn_h,
+                    5,
+                    scrn_h))
+
+    def left_edge(self):
+        return pg.draw.rect(screen,
+                (0,0,255),
+                pg.Rect(5,
+                    scrn_h,
+                    scrn_w,
+                    5))
+
+    def top_edge(self):
+        return pg.draw.rect(screen,
+                (0,0,255),
+                pg.Rect(0,
+                    scrn_h,
+                    scrn_w,
+                    5))
+
     def deathzone(self):
         return pg.draw.rect(screen,
                 (0,0,255),
