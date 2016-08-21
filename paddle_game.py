@@ -11,25 +11,41 @@ scrn_h = screen.get_height()
 scrn_w = screen.get_width()
 
 class GameState():
-    def __init__(self, *args, **kwargs):
+    def __init__(self, level=1, *args, **kwargs):
         self.player_lives = 3
         self.current_score = 0
+        self.level = level
         self.level_designs = {
         1: {
-            'dimensions': (15, 15) #(x,y) block dimensions
+            'dimensions': (10, 4), #(x,y) block dimensions
+            'upper left': (150, 150)
             }
         }
+
+        self.block_field = []
+
+
+        for row in xrange(1, self.level_designs[level]['dimensions'][1]+1):
+            row = []
+            for col in xrange(1, self.level_designs[level]['dimensions'][0]+1):
+                row.append(EasyBlock())
+            self.block_field.append(row)
+        self.draw_field()
+
 
         self.player_paddle_state = ['prev_x', 'current_x']
         self.ball_travels = {'prev': 'up_pos_m'}
 
-    def build_field(level=1):
-        """
-        this'll be a doozy, based on level, read out from field design dict
-        and initialize all the blocks in the field with randomized chances for
-        drops.
-        """
-        pass
+    def draw_field(self):
+        top_corner = self.level_designs[self.level]['upper left']
+        row_offset = 20
+        col_offset = 50
+        for row, rects in enumerate(self.block_field):
+            for col, rect in enumerate(rects):
+                rect.set_x_pos((col_offset * col) + top_corner[0])
+                rect.set_y_pos((row_offset * row) + top_corner[1])
+                rect._draw()
+
 
     def get_score(self):
         return self.current_score
@@ -111,6 +127,10 @@ class GameState():
 class GameBlock(pg.Rect):
     def __init__(self, to_destroy, **kwargs):
         self.has_bonus()
+        self.width = 50
+        self.height = 20
+        self.x_pos = 150
+        self.y_pos = 150
         self.to_destroy = to_destroy
         self.color_sequence = []
         for num in range(0, to_destroy):
@@ -124,9 +144,12 @@ class GameBlock(pg.Rect):
         'slow ball': 'slows ball speed by 2',
         'splash bomb': 'explosive causes 3 damage to one square and 1 to surrounding',
         'extra ball': 'need to add an is_extra attr to ball class',
-        'triple ball': 'splits ball mid air, need to tweek ball class further'
+        'triple ball': 'splits ball mid air, need to tweek ball class further',
         'drill': 'causes strike damage to anything thing in its path for a total of 15 eg 1 easy block followed by 4 mediums, it destroys them successively',
-        'sticky bomb': 'allows angular launch, bounces from wall, but sticks to blocks acts like splash bomb'
+        'sticky bomb': 'allows angular launch, bounces from wall, but sticks to blocks acts like splash bomb',
+        'explosive ball': 'may take some tweeking',
+        'paddle expand': 'should it be stackable?',
+
         }
 
     def has_bonus(self):
@@ -136,6 +159,25 @@ class GameBlock(pg.Rect):
         returns a bonus type as string, eg 'rockets', or False
         """
         pass
+
+    def set_x_pos(self, pos):
+        self.x_pos = pos
+        return None
+
+    def set_y_pos(self, pos):
+        self.y_pos = pos
+        return None
+
+    def _draw(self):
+        color_index = self.to_destroy - 1
+        color = self.color_sequence[color_index]
+        return pg.draw.rect(screen,
+                color,
+                pg.Rect(self.x_pos,
+                    self.y_pos,
+                    self.width,
+                    self.height))
+
 
 class EasyBlock(GameBlock):
     def __init__(self, *args, **kwargs):
@@ -275,8 +317,10 @@ class Ball(Player):
 
         if up and rightward:
             self.up_pos_m()
+            self.game_state.current_score += 1
         elif up and leftward:
             self.up_neg_m()
+            self.game_state.current_score += 1
         elif down and rightward:
             self.down_neg_m()
         elif down and leftward:
@@ -379,9 +423,11 @@ y_dir = True
 
 font = pg.font.Font(None, 25)
 
-_state = GameState()
+_state = GameState(1)
 _player = Player(_state)
 _ball = Ball(_state)
+
+_block = DemonBlock()
 
 #game loop
 while not done:
@@ -412,6 +458,7 @@ while not done:
         top = _state.top_edge()
         if _ball.check_lauch():
             _ball.travel(_ball.check_collision(ball, left, top, right, death, paddle))
+        _state.draw_field()
 
         score_text = font.render("Current Score: %d"%_state.get_score(),
                     True,
