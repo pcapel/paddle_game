@@ -85,11 +85,11 @@ class GameState():
         """
         pass
 
-    def _draw_deathzone(self):
+    def deathzone(self):
         return pg.draw.rect(screen,
-                (0,255,0),
-                pg.Rect(scrn_h,
-                    scrn_w,
+                (0,0,255),
+                pg.Rect(0,
+                    scrn_h,
                     scrn_w,
                     5))
 
@@ -269,7 +269,7 @@ while not done:
         screen.fill((0, 0, 0))
         _player._draw()
         _ball._draw(_player)
-        _state._draw_deathzone()
+        _state.deathzone()
 
         #p = draw_player()
         #c = draw_ball()
