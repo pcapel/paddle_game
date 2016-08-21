@@ -18,12 +18,12 @@ class GameState():
         self.level_designs = {
         1: {
             'dimensions': (10, 4), #(x,y) block dimensions
-            'upper left': (150, 150),
+            'upper left': (scrn_w/2, scrn_h/2),
             'block type': EasyBlock,
             },
         2: {
             'dimensions': (10, 5),
-            'upper left': (200, 100),
+            'upper left': (scrn_w/2, scrn_h/2),
             'block type': MediumBlock,
         }
         }
