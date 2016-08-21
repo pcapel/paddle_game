@@ -323,11 +323,6 @@ class Ball(Player):
                 (self.x_pos, self.y_pos),
                 radius)
 
-
-
-
-
-
 done = False
 
 player_color = (150, 0, 150)
@@ -353,8 +348,6 @@ font = pg.font.Font(None, 25)
 _state = GameState()
 _player = Player(_state)
 _ball = Ball(_state)
-
-
 
 #game loop
 while not done:
@@ -386,33 +379,6 @@ while not done:
         if _ball.check_lauch():
             _ball.travel(_ball.check_collision(ball, left, top, right, death, paddle))
 
-        #p = draw_player()
-        #c = draw_ball()
-
-        # paddle_x_zone = (player_x + 1,
-        #                 player_x + player_paddle_width + 1)
-        #
-        # comp_in_zone = (comp_x > paddle_x_zone[0]
-        #                 and comp_x < paddle_x_zone[1])
-        #
-        # comp_in_contact = (comp_in_zone
-        #                 and comp_y == screen.get_height()
-        #                             - player_paddle_height
-        #                             - comp_height)
-        comp_below_contact = (comp_y > screen.get_height()
-                                         - player_paddle_height
-                                         - comp_height)
-        #
-        # if p.colliderect(c) and comp_below_contact:
-        #      y_dir = not y_dir
-        #      x_dir = not x_dir
-        #      strike_counter += 1
-        # elif p.colliderect(c) and not comp_below_contact:
-        #     y_dir = not y_dir
-        # elif (comp_in_zone
-        # and comp_below_contact):
-        #     x_dir = not x_dir
-
         score_text = font.render("Current Score: %d"%_state.get_score(),
                     True,
                     (0, 255,255))
@@ -425,33 +391,6 @@ while not done:
         (15, 15))
         screen.blit(score_text,
         (screen.get_width() - (score_text.get_width() + 15), 15))
-
-        if (x_dir
-        and y_dir):
-            comp_x += 5
-            comp_y += 5
-        elif (not x_dir
-        and not y_dir):
-            comp_x -= 5
-            comp_y -= 5
-        elif (x_dir
-        and not y_dir):
-            comp_x += 5
-            comp_y -= 5
-        elif (not x_dir
-        and y_dir):
-            comp_x -= 5
-            comp_y += 5
-
-        if comp_x >= screen.get_width() - 15:
-            x_dir = not x_dir
-        elif comp_x <= 0:
-            x_dir = not x_dir
-
-        if comp_y >= screen.get_height() - 15:
-            y_dir = not y_dir
-        elif comp_y <= 0:
-            y_dir = not y_dir
 
         pg.display.flip()
         clock.tick(60)
