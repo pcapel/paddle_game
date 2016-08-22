@@ -10,15 +10,20 @@ screen = pg.display.set_mode((800, 700))
 scrn_h = screen.get_height()
 scrn_w = screen.get_width()
 
+class BlockMaps():
+    def __init__(self, *args, **kwargs):
+        #I think this'll work...
+        pass
+
 class GameState():
-    def __init__(self, level=2, *args, **kwargs):
+    def __init__(self, level=1, *args, **kwargs):
         self.player_lives = 3
         self.current_score = 0
         self.level = level
         self.level_designs = {
         1: {
             'dimensions': (10, 4), #(x,y) block dimensions
-            'upper left': (scrn_w/2, scrn_h/2),
+            'upper left': ((scrn_w-500)/2, scrn_h/2),
             'block type': EasyBlock,
             },
         2: {
