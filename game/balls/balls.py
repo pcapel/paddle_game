@@ -21,6 +21,7 @@ class Ball(Player):
 
     #I need to add in the slope variability so that the ball
     #will travel at different angles
+    #abstract collision_with into a method returns bool
     def travel(self, collision_with):
         prev = self.game_state.ball_travels['prev']
         left = (collision_with == 'right'

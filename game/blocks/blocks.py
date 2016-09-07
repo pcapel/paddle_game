@@ -1,4 +1,5 @@
 
+
 class GameBlock(pg.Rect):
     def __init__(self, to_destroy, **kwargs):
         self.has_bonus()
@@ -12,6 +13,8 @@ class GameBlock(pg.Rect):
         self.score_for_destroy = to_destroy * 100
         self.possible_bonus = {
         'missile': 'single misile, causes 1 strike to 1 block',
+        'sidewinder missile': 'single missile, causes 3 strikes to 1 block, splash 1 damage 1 block radius',
+        'nuclear missile': 'single missile, causes 25 damage to 1 block, splash damage 10 block radius, diminishes accordingly',
         '2x score': 'duh',
         '3x score': 'duh',
         'slow ball': 'slows ball speed by 2',
@@ -72,28 +75,27 @@ class GameBlock(pg.Rect):
                     self.width,
                     self.height), 2)
 
+    class EasyBlock(GameBlock):
+        def __init__(self, *args, **kwargs):
+            GameBlock.__init__(self, 1)
+            self.set_colors(0, 0, 240)
 
-class EasyBlock(GameBlock):
-    def __init__(self, *args, **kwargs):
-        GameBlock.__init__(self, 1)
-        self.set_colors(0, 0, 240)
+    class MediumBlock(GameBlock):
+        def __init__(self, *args, **kwargs):
+            GameBlock.__init__(self, 3)
+            self.set_colors(150, 0, 240)
 
-class MediumBlock(GameBlock):
-    def __init__(self, *args, **kwargs):
-        GameBlock.__init__(self, 3)
-        self.set_colors(150, 0, 240)
+    class HardBlock(GameBlock):
+        def __init__(self, *args, **kwargs):
+            GameBlock.__init__(self, 5)
+            self.set_colors(200, 0, 150)
 
-class HardBlock(GameBlock):
-    def __init__(self, *args, **kwargs):
-        GameBlock.__init__(self, 5)
-        self.set_colors(200, 0, 150)
+    class InsaneBlock(GameBlock):
+        def __init__(self, *args, **kwargs):
+            GameBlock.__init__(self, 10)
+            self.set_colors(200, 0, 100)
 
-class InsaneBlock(GameBlock):
-    def __init__(self, *args, **kwargs):
-        GameBlock.__init__(self, 10)
-        self.set_colors(200, 0, 100)
-
-class DemonBlock(GameBlock):
-    def __init__(self, *args, **kwargs):
-        GameBlock.__init__(self, 20)
-        self.set_colors(240, 50, 50)
+    class DemonBlock(GameBlock):
+        def __init__(self, *args, **kwargs):
+            GameBlock.__init__(self, 20)
+            self.set_colors(240, 50, 50)
