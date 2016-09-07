@@ -1,18 +1,25 @@
+import pygame as pg
+
+from game.blocks.blocks import *
+
 class GameState():
-    def __init__(self, level=1, *args, **kwargs):
+    def __init__(self, screen, scrn_h, scrn_w, level=1, *args, **kwargs):
         self.player_lives = 3
         self.current_score = 0
         self.level = level
+        self.scrn_h = scrn_h
+        self.scrn_w = scrn_w
+        self.screen = screen
         #this is silly, these are probably going to work best as classes
         self.level_designs = {
         1: {
             'dimensions': (10, 4), #(x,y) block dimensions
-            'upper left': ((scrn_w-500)/2, scrn_h/2),
+            'upper left': ((self.scrn_w-500)/2, self.scrn_h/2),
             'block type': EasyBlock,
             },
         2: {
             'dimensions': (10, 5),
-            'upper left': (scrn_w/2, scrn_h/2),
+            'upper left': (self.scrn_w/2, self.scrn_h/2),
             'block type': MediumBlock,
         }
         }
@@ -23,7 +30,7 @@ class GameState():
 
         for row in xrange(1, self.level_designs[level]['dimensions'][1]+1):
             for col in xrange(1, self.level_designs[level]['dimensions'][0]+1):
-                self.block_field['row%dcol%d'%(row,col)] = (self.level_designs[level]['block type'](), (row, col))
+                self.block_field['row%dcol%d'%(row,col)] = (self.level_designs[level]['block type'](self.screen), (row, col))
         self.draw_field()
 
 
@@ -100,35 +107,35 @@ class GameState():
         return self.ball_travels['prev']
 
     def right_edge(self):
-        return pg.draw.rect(screen,
+        return pg.draw.rect(self.screen,
                 (0,0,0),
-                pg.Rect(scrn_w - 1,
+                pg.Rect(self.scrn_w - 1,
                     0,
                     1,
-                    scrn_h))
+                    self.scrn_h))
 
     def left_edge(self):
-        return pg.draw.rect(screen,
+        return pg.draw.rect(self.screen,
                 (0,0,0),
                 pg.Rect(-4,
                     0,
                     5,
-                    scrn_h))
+                    self.scrn_h))
 
     def top_edge(self):
-        return pg.draw.rect(screen,
+        return pg.draw.rect(self.screen,
                 (0,0,0),
                 pg.Rect(0,
                     -4,
-                    scrn_w,
+                    self.scrn_w,
                     5))
 
     def deathzone(self):
-        return pg.draw.rect(screen,
+        return pg.draw.rect(self.screen,
                 (0,0,0),
                 pg.Rect(0,
-                    scrn_h - 1,
-                    scrn_w,
+                    self.scrn_h - 1,
+                    self.scrn_w,
                     5))
 
     def timer(start=1, end=5):

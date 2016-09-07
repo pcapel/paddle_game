@@ -4,11 +4,11 @@ import random
 import sqlite3 as sq
 #use sqlite db for save game data
 
-from game.state import GameState as gs
-from game.player import Player as p
-from game.balls import Ball as b
-from game.levels import Levels as Lvl
-from game.blocks import GameBlock as gb
+from game.state.state import GameState as gs
+from game.player.player import Player as p
+from game.balls.balls import Ball as b
+from game.levels.levels import Levels as Lvl
+from game.blocks import blocks
 
 implementaion_ideas = """
 fix the ball bounce glitches.
@@ -32,11 +32,6 @@ done = False
 player_color = (150, 0, 150)
 comp_color = (255, 255, 255)
 
-player_paddle_width = 75
-player_paddle_height = 20
-player_x = 175
-player_y = screen.get_height() - player_paddle_height
-
 comp_width = 15
 comp_height = 15
 comp_x = 150
@@ -49,10 +44,10 @@ y_dir = True
 
 font = pg.font.Font(None, 25)
 
-_state = GameState()
-_player = Player(_state)
-_ball = Ball(_state)
-_block = DemonBlock()
+_state = gs(screen, scrn_h, scrn_w)
+_player = p(_state, screen, scrn_h, scrn_w)
+_ball = b(_state, screen, _player)
+_block = blocks.DemonBlock(screen)
 
 #game loop
 while not done:
@@ -68,7 +63,7 @@ while not done:
 
         if (pressed[pg.K_RIGHT]
         and _player.get_x() < screen.get_width()
-                    - player_paddle_width):
+                    - _player.get_paddle_width()):
             _player.move_right()
 
         if (pressed[pg.K_SPACE]):

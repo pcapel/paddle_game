@@ -1,11 +1,15 @@
-class Ball(Player):
+import pygame as pg
+import math
+
+class Ball():
     """
     the ball class is the game ball, and will have methods associated with
     collision, such as tracking position and what type of surface it has collided
     with, as well as any relevant power up info
     """
-    def __init__(self, state, *args, **kwargs):
+    def __init__(self, state, screen, *args, **kwargs):
         #define initial vectors and position then pass to GameState
+        self.screen = screen
         self.call_dict = {
         'up_pos_m': self.up_pos_m,
         'up_neg_m': self.up_neg_m,
@@ -140,12 +144,12 @@ class Ball(Player):
             start_from = player_instance.return_center()
             self.x_pos = start_from[0]
             self.y_pos = start_from[1]
-            return pg.draw.circle(screen,
+            return pg.draw.circle(self.screen,
                 color,
                 player_instance.return_center(),
                 radius)
         else:
-            return pg.draw.circle(screen,
+            return pg.draw.circle(self.screen,
                 color,
                 (int(self.x_pos), int(self.y_pos)),
                 radius)

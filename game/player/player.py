@@ -1,15 +1,22 @@
+import pygame as pg
+
 class Player(pg.Rect):
     """
     the player class will represent the paddle that the player controls
     it will have methods associated with controlling power ups, actions,
     and the like
     """
-    def __init__(self, state, *args, **kwargs):
+    def __init__(self, state, screen, scrn_h, scrn_w, *args, **kwargs):
         self.game_state = state
         self.width = 120
         self.height = 20
         self.x_pos = 175
-        self.y_pos = scrn_h - player_paddle_height
+        self.screen = screen
+        self.player_paddle_width = 75
+        self.player_paddle_height = 20
+        self.player_x = 175
+        self.player_y = screen.get_height() - self.player_paddle_height
+        self.y_pos = scrn_h - self.player_paddle_height
         self.center = ((self.x_pos + self.width / 2), self.y_pos)
         self.dir = None
         self.speed = 9
@@ -58,6 +65,9 @@ class Player(pg.Rect):
     def get_x(self):
         return self.x_pos
 
+    def get_paddle_width(self):
+        return self.player_paddle_width
+
     def return_center(self):
         return self.center
 
@@ -69,7 +79,7 @@ class Player(pg.Rect):
         if not height:
             height = self.height
 
-        return pg.draw.rect(screen,
+        return pg.draw.rect(self.screen,
                 color,
                 pg.Rect(self.x_pos,
                     self.y_pos,

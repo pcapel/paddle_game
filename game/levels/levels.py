@@ -1,3 +1,4 @@
+import pygame as pg
 
 #maybe have a decorator for secret levels?
 class Levels():
@@ -5,6 +6,6 @@ class Levels():
         #I think this'll work...
         pass
 
-    class LevelOne(Levels):
-        #yesh!!!!
-        pass
+class LevelOne(Levels):
+    #yesh!!!!
+    pass
